@@ -1,0 +1,321 @@
+<html>
+<head>
+        <meta charset="utf-8">
+        <title>Ticket Generator</title>
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" type="image/png" href="/ticket.jpg" size="30x24">
+		<link href="https://fonts.googleapis.com/css?family=Knewave" rel="stylesheet">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+		<link href="https://fonts.googleapis.com/css?family=Knewave" rel="stylesheet">
+
+
+        <link rel="stylesheet" href="/assets/css/animate.css">
+        <link rel="stylesheet" href="/assets/css/iconfont.css">
+        <link rel="stylesheet" href="/assets/css/font-awesome.min.css">
+       <!-- <link rel="stylesheet" href="assets/css/bootstrap.css"> -->
+        <link rel="stylesheet" href="/assets/css/magnific-popup.css">
+        <link rel="stylesheet" href="/assets/css/bootsnav.css">
+		
+        <link rel="stylesheet" href="/assets/css/style.css">
+        <link rel="stylesheet" href="/assets/css/responsive.css" />
+<script>
+$(document).ready(function(){
+    $("#btn1").click(
+      function() {
+        var yourdomain = 'divyathalishajahanhelp'; 
+        var api_key = '7jFYAL54rURXYh40is'; 
+
+        var formdata = new FormData();
+        formdata.append('description', 'sample description');
+        formdata.append('email', 'divyathshajece@gmail.com');
+        formdata.append('subject', 'Test subject');
+        formdata.append('priority', '2');
+        formdata.append('status', '2');
+		formdata.append('attachments[]', $('#myFile')[0].files[0]);			
+	    
+        $.ajax(
+		
+          {
+            url: "https://"+yourdomain+".freshdesk.com/api/v2/tickets",
+            type: 'POST',
+            contentType: false,
+            processData: false,
+            headers: {
+              "Authorization": "Basic " + btoa(api_key + ":x")
+            },
+            data: formdata,        
+      		
+			success: function(data, textStatus, jqXHR) {			  
+              $('#result').text('Success');
+              $('#code').text(jqXHR.status);
+              $('#response').html(JSON.stringify(data, null, "<br/>"));
+			  
+            },
+            error: function(jqXHR,tranStatus,data) {			
+              $('#result').text('Error');
+              $('#code').text(jqXHR.status);
+			  $('#response').html(JSON.stringify(data, null, "<br/>"));
+              x_request_id = jqXHR.getResponseHeader('X-Request-Id');
+              response_text = jqXHR.responseText;
+              $('#response').html(" Error Message : <b style='color: red'>"+response_text+"</b>.<br/> Your X-Request-Id is : <b>" + x_request_id + "</b>. Please contact support@freshdesk.com with this id for more information.");
+              
+            }
+          }
+        );
+      }
+    );
+});
+
+$(document).ready(function(){
+    $("#btn2").click(
+      function() {
+        var yourdomain = 'divyathalishajahanhelp'; 
+        var api_key = '7jFYAL54rURXYh40is'; 
+        var updated = $("#update").val();
+		var ticket_id = updated; // Id of the ticket to be edited. Say., 12
+        
+
+        ticket_data = '{ "subject" : "final subject", "priority" : 2 }';
+        $.ajax(
+          {     
+            url: "https://"+yourdomain+".freshdesk.com/api/v2/tickets/"+ticket_id,
+            type: 'PUT',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            headers: {
+              "Authorization": "Basic " + btoa(api_key + ":X")
+            },
+            data: ticket_data,
+            success: function(data, textStatus, jqXHR) {
+              $('#result').text('updated Successfully','blue');
+              $('#code').text(jqXHR.status);
+              $('#response').html(JSON.stringify(data, null, "<br/>"));
+            },
+             error: function(jqXHR,tranStatus,data) {			
+              $('#result').text('Error');
+              $('#code').text(jqXHR.status);
+			  $('#response').html(JSON.stringify(data, null, "<br/>"));
+              x_request_id = jqXHR.getResponseHeader('X-Request-Id');
+              response_text = jqXHR.responseText;
+              $('#response').html(" Error Message : <b style='color: red'>"+response_text+"</b>.<br/> Your X-Request-Id is : <b>" + x_request_id + "</b>. Please contact support@freshdesk.com with this id for more information.");
+              
+            }
+          }
+        );
+      }
+    );
+	$("#btn3").click(
+      function() {
+        var yourdomain = 'divyathalishajahanhelp'; 
+        var api_key = '7jFYAL54rURXYh40is'; 
+        $.ajax(
+          {
+            url: "https://"+yourdomain+".freshdesk.com/api/v2/tickets",
+            type: 'GET',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            headers: {
+              "Authorization": "Basic " + btoa(api_key + ":x")
+            },
+            success: function(data, textStatus, jqXHR) {
+              $('#result').text('Success');
+              $('#code').text(jqXHR.status);
+              $('#response').html(JSON.stringify(data, null, "<br/>"));
+			  $('#disp').html(JSON.stringify(data));
+			  
+			  for(var i=0;i<data.length;i++)
+			  {
+			    var x= data[i].id;
+				console.log(JSON.stringify(data[i].id));
+			  }
+            },
+             error: function(jqXHR,tranStatus,data) {			
+              $('#result').text('Error');
+              $('#code').text(jqXHR.status);
+			  $('#response').html(JSON.stringify(data, null, "<br/>"));
+              x_request_id = jqXHR.getResponseHeader('X-Request-Id');
+              response_text = jqXHR.responseText;
+              $('#response').html(" Error Message : <b style='color: red'>"+response_text+"</b>.<br/> Your X-Request-Id is : <b>" + x_request_id + "</b>. Please contact support@freshdesk.com with this id for more information.");
+              
+            }
+          }
+        );
+      }
+    );
+});
+$(document).ready(function(){
+    $("#btn4").click(
+      function() {
+        var yourdomain = 'divyathalishajahanhelp'; 
+        var api_key = '7jFYAL54rURXYh40is'; 
+        var updated = $("#delete").val();
+		var ticket_id = updated; // Id of the ticket to be edited. Say., 12        
+
+        ticket_data = '{ "subject" : "final subject", "priority" : 2 }';
+        $.ajax(
+          {     
+            url: "https://"+yourdomain+".freshdesk.com/api/v2/tickets/"+ticket_id,
+            type: 'DELETE',
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            headers: {
+              "Authorization": "Basic " + btoa(api_key + ":X")
+            },
+            data: ticket_data,
+            success: function(data, textStatus, jqXHR) { 			  	  
+              $('#result').text('Success');
+              $('#code').text(jqXHR.status);
+              $('#response').html(JSON.stringify(data, null, "<br/>")); 
+			  console.log(data);						  
+            },
+             error: function(jqXHR,tranStatus,data) {			
+              $('#result').text('Error');
+              $('#code').text(jqXHR.status);
+			  $('#response').html(JSON.stringify(data, null, "<br/>"));
+              x_request_id = jqXHR.getResponseHeader('X-Request-Id');
+              response_text = jqXHR.responseText;
+              $('#response').html(" Error Message : <b style='color: red'>"+response_text+"</b>.<br/> Your X-Request-Id is : <b>" + x_request_id + "</b>. Please contact support@freshdesk.com with this id for more information.");
+              
+            }
+          }
+        );
+      }
+    );
+});
+</script>
+</head>
+<body data-spy="scroll" data-target=".navbar-collapse">
+  <nav class="navbar navbar-default bootsnav navbar-fixed  ">
+                          <table cellspace='10'>
+						  <tr>
+						     <td>
+						    <img src="ticket-ticket-png-clip-art.png" alt="" width="160 " height="80" border ="10px solid"/>
+						    </td>
+                             <td class="navbar-brand" href="#brand">                            					   
+								Ticket Generator					    
+                             </td> 
+							 <td>
+						       <img src="ticket-ticket-png-clip-art.png" alt="" width="160 " height="80" border ="10px solid"/>
+						     </td>
+							</tr>
+						 </table>                           
+ </nav>
+ <div class="container">
+  <div class="container">
+   <div class="container">
+    <section > 
+                <div class="container">
+                    <div class="main_home">
+                                <div class="container" id="err"> </div>
+								<table cellspacing = '20'>
+									<tr>
+									<td> 
+										<div>
+											<input type='file' id='myFile' class="form-control" />
+										</div> 
+									</td>
+									<td>
+										    <div>
+											<button id="btn1" class="btn btn-primary m-top-20" color="black">Create ticket</button>
+									      	</div>
+									    </td>
+									   </tr>
+									   <tr>
+										<td> 
+											<div >
+												<input type="number" id="update" class="form-control" placeholder="enter the Ticket id" >            
+											</div> 
+										</td>
+										<td>
+											<div >
+												<button id="btn2" class="btn btn-primary m-top-20" color="black">Update ticket</button>
+											</div>
+										</td>
+										</tr>
+										<tr>
+											<td><div>Show All details</div></td>
+											<td> <div><button id="btn3" class="btn btn-primary m-top-20" color="black">Fetch details</button></div> </td>
+										</tr>
+										<tr>
+										<td> 
+											<div >
+												<input type="number" id="delete" class="form-control" placeholder="enter the Ticket id" >            
+											</div> 
+										</td>
+										<td>
+											<div >
+												<button id="btn4" class="btn btn-primary m-top-20" color="black">Delete ticket</button>
+											</div>
+										</td>
+								</table>
+                            </div>
+						</div>					
+				</section>
+				
+<div id="container">
+<h3>Result</h3>
+ <div class="container">
+                    <div class="row">
+                        <div class="main_about">
+                            <div class="col-md-5 col-md-offset-1">
+                                <div class="about_content">
+                                    <p>
+									<div id = 'result' class="container" >
+									</div>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+ </div>
+ <h3>Code</h3>
+ <div class="container">
+                    <div class="row">
+                        <div class="main_about">
+                            <div class="col-md-5 col-md-offset-1">
+                                <div class="about_content">
+								<p>
+                                  <div id = 'code' class="container" background-color="blue">
+								  </div>
+								 </p>
+								</div>
+							</div>
+						</div>
+					</div>
+</div>
+ <h3>Response</h3>
+ <div class="container">
+                    <div class="row">
+                        <div class="main_about">
+                            <div class="col-md-5 col-md-offset-1">
+                                <div class="about_content">
+									<p>
+									<div id = 'response' class="container" background-color="blue">
+									</div>
+									</p>
+								</div>
+							</div>
+						</div>
+					</div>
+</div>
+ <h3>Display all the details</h3>
+ <div class="container" border="5px solid green">
+                    <div class="row">
+                        <div class="main_about">
+                            <div class="col-md-5 col-md-offset-1">
+                                <div class="about_content">
+								   <p>
+									<div id="disp"class="container" >
+									</div>
+									</p>
+  								</div>
+							</div>	
+						</div>
+					</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</body>
+</html>
