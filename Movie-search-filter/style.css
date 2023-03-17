@@ -1,0 +1,41 @@
+#myInput {
+    position:absolute;
+    background-position: 10px 10px;
+    background-repeat: no-repeat;
+    width: 30%;
+    top:10px;
+    right:16px;                
+    font-size: 16px;
+    padding: 12px 20px 12px 40px;
+    border: 1px solid #ddd;
+    margin-bottom: 12px;
+    }
+main {
+    display: flex;
+    justify-content: center;
+    }
+
+table {
+    position:absolute;
+    top:70px;
+    max-width: 100%;
+}
+
+tr:nth-child(odd) {
+     background-color: #eee;
+}
+
+th {
+     background-color:rgb(112, 201, 236);
+     color: #fff;
+     text-align:center;
+     padding: 0.5em 1em;
+}
+
+td {
+     text-align:justify;
+     padding: 0.5em 1em;
+}
+b{
+    color:red;
+}
