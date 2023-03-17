@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<meta charset="UTF-8">
+<script src="weather.js"></script>
+<link rel="stylesheet" href="wether.css">
+<body>
+<div class="row">
+  <div class="column">
+    <div class="card">
+      <!----------name based search---->
+	  <h3>Place<h3>
+	  <input type="text" id="id1" placeholder="City Name"><br/><br/>
+	  <button id="btn1" onclick="fun()">Click me!</button>
+	  <br/><br/>
+	  <!----------Latitude,Longitude based search---->
+	  <h3>Find place<h3/>
+	  <input type="text" id="lati" placeholder="Latitude"><br/>
+	  <input type="text" id="longi" placeholder="Longitude"><br/>
+	  <button id="btn" onclick="info()">Find Place<button/>
+    </div>
+  </div>
+
+  <div class="column1">
+    <div class="card1" id="myList">
+	<p><p/>
+    </div>
+  </div>
+  
+</div>
+</body>
+</html>
