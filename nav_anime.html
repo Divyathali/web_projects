@@ -1,0 +1,131 @@
+<html>
+<head>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway" />
+    <style>
+        @import 'https://fonts.googleapis.com/css?family=Raleway';
+
+        html, body {
+            margin: 0px;
+        }
+
+
+        div.container {
+            font-family: Raleway;
+            margin: 0 auto;
+            padding: 10em 3em;
+            text-align: center;
+        }
+
+            div.container a {
+                color: #FFF;
+                text-decoration: none;
+                font: 20px Raleway;
+                margin: 0px 10px;
+                padding: 10px 10px;
+                position: relative;
+                z-index: 0;
+                cursor: pointer;
+            }
+
+        .blue {
+            background: #2196f3;
+        }
+
+        .brown {
+            background: #795548;
+        }
+
+        /* Circle behind */
+        div.circleBehind a:before, div.circleBehind a:after {
+            position: absolute;
+            top: 22px;
+            left: 50%;
+            width: 50px;
+            height: 50px;
+            border: 4px solid #0277bd;
+            transform: translateX(-50%) translateY(-50%) scale(0.8);
+            border-radius: 50%;
+            background: transparent;
+            content: "";
+            opacity: 0;
+            transition: all 0.3s;
+            z-index: -1;
+        }
+
+        div.circleBehind a:after {
+            border-width: 2px;
+            transition: all 0.4s;
+        }
+
+        div.circleBehind a:hover:before {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-50%) scale(1);
+        }
+
+        div.circleBehind a:hover:after {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-50%) scale(1.3);
+        }
+
+        /* Highlight text out  */
+        div.highlightTextOut a {
+            color: rgba(255, 255, 255, 0.3);
+        }
+
+            div.highlightTextOut a:before, div.highlightTextIn a:before {
+                position: absolute;
+                top: 10px;
+                left: 0px;
+                width: 100px;
+                height: 100px;
+                border: 4px;
+                transform: translateX(-50%) translateY(-50%) scale(0.8);
+                border-radius: 50%;
+                background: transparent;
+                opacity: 0;
+                transition: all 0.3s;
+                z-index: 1;
+                color: #FFF;
+                padding: 10px;
+                overflow: hidden;
+                content: attr(alt);
+            }
+
+            div.highlightTextOut a:hover:before, div.highlightTextIn a:hover:before {
+                
+                transform: scale(1);
+                opacity: 1;
+            }
+
+        /* Highlight text in  */
+        div.highlightTextIn a {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-50%) scale(1);
+            color: rgba(0, 0, 0, 0);
+        }
+        div.highlightTextIn a:before {
+            opacity: 1;
+            transform: translateX(-50%) translateY(-50%) scale(1);
+        } 
+    </style>
+
+</head>
+<body>
+    <div class="container brown circleBehind">
+        <a>HOME</a>
+        <a>ARTICLES</a>
+        <a>PORTFOLIO</a>
+        <a>ABOUT</a>
+        <a>CONTACT</a>
+    </div>
+
+    <div class="container brown highlightTextOut circleBehind">
+        <a alt="HOME">HOME</a>
+        <a alt="ARTICLES">ARTICLES</a>
+        <a alt="SKILLS">SKILLS</a>
+        <a alt="ABOUT">ABOUT</a>
+        <a alt="CONTACT">CONTACT</a>
+    </div>
+</body>
+</html>
+

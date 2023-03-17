@@ -1,0 +1,1428 @@
+<html>
+
+<head>
+    <style>
+        .underline {
+            position: relative;
+        }
+        
+        .underline span {
+            pointer-events: none;
+            color: red;
+        }
+        
+        .underline canvas {
+            pointer-events: auto;
+            position: absolute;
+            top: 0;
+            left: 0;
+            /*z-index: -1;*/
+            -moz-user-select: none;
+            -khtml-user-select: none;
+            -webkit-user-select: none;
+            -o-user-select: none;
+            cursor: pointer;
+        }
+        
+        body {
+            font-size: 24px;
+            line-height: 36px;
+            margin: 0 auto;
+            width: 500px;
+            padding: 0;
+            -moz-osx-font-smoothing: grayscale;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+        }
+        
+        a {
+            text-decoration: none;
+        }
+        
+        p {
+            font-family: "EB Garamond";
+            margin-top: 24px;
+        }
+        
+        p.text a {
+            font-size: 48px;
+            line-height: 1.4em;
+            font-style: italic;
+        }
+        
+        p a.title {
+            font-size: 126px;
+            line-height: 1.4em;
+        }
+        
+        p em {
+            font-style: italic;
+        }
+        
+        p:empty {
+            margin-top: 0px;
+        }
+    </style>
+    <script>
+        /* Universal Module Definition */
+        (function(root, factory) {
+            if (typeof define === 'function' && define.amd) {
+                // AMD. Register as a named AMD module.
+                define('baselineRatio', [], function() {
+                    return (root.baselineRatio = factory());
+                });
+            } else if (typeof exports === 'object') {
+                // Node. Does not work with strict CommonJS, but
+                // only CommonJS-like enviroments that support module.exports,
+                // like Node.
+                module.exports = factory();
+            } else {
+                // Browser globals
+                root.baselineRatio = factory();
+            }
+        }(this, function() {
+            var baselineRatio = function(elem) {
+                // Get the baseline in the context of whatever element is passed in.
+                elem = elem || document.body;
+
+                // The container is a little defenseive.
+                var container = document.createElement('div');
+                container.style.display = "block";
+                container.style.position = "absolute";
+                container.style.bottom = "0";
+                container.style.right = "0";
+                container.style.width = "0px";
+                container.style.height = "0px";
+                container.style.margin = "0";
+                container.style.padding = "0";
+                container.style.visibility = "hidden";
+                container.style.overflow = "hidden";
+
+                // Intentionally unprotected style definition.
+                var small = document.createElement('span');
+                var large = document.createElement('span');
+
+                // Large numbers help improve accuracy.
+                small.style.fontSize = "0px";
+                large.style.fontSize = "2000px";
+
+                small.innerHTML = "X";
+                large.innerHTML = "X";
+
+                container.appendChild(small);
+                container.appendChild(large);
+
+                // Put the element in the DOM for a split second.
+                elem.appendChild(container);
+                var smalldims = small.getBoundingClientRect();
+                var largedims = large.getBoundingClientRect();
+                elem.removeChild(container);
+
+                // Calculate where the baseline was, percentage-wise.
+                var baselineposition = smalldims.top - largedims.top;
+                var height = largedims.height;
+
+                return 1 - (baselineposition / height);
+            }
+
+            return baselineRatio;
+        }));
+
+        /*!
+         * classie v1.0.1
+         * class helper functions
+         * from bonzo https://github.com/ded/bonzo
+         * MIT license
+         * 
+         * classie.has( elem, 'my-class' ) -> true/false
+         * classie.add( elem, 'my-new-class' )
+         * classie.remove( elem, 'my-unwanted-class' )
+         * classie.toggle( elem, 'my-class' )
+         */
+
+        /*jshint browser: true, strict: true, undef: true, unused: true */
+        /*global define: false, module: false */
+
+        (function(window) {
+
+            'use strict';
+
+            // class helper functions from bonzo https://github.com/ded/bonzo
+
+            function classReg(className) {
+                return new RegExp("(^|\\s+)" + className + "(\\s+|$)");
+            }
+
+            // classList support for class management
+            // altho to be fair, the api sucks because it won't accept multiple classes at once
+            var hasClass, addClass, removeClass;
+
+            if ('classList' in document.documentElement) {
+                hasClass = function(elem, c) {
+                    return elem.classList.contains(c);
+                };
+                addClass = function(elem, c) {
+                    elem.classList.add(c);
+                };
+                removeClass = function(elem, c) {
+                    elem.classList.remove(c);
+                };
+            } else {
+                hasClass = function(elem, c) {
+                    return classReg(c).test(elem.className);
+                };
+                addClass = function(elem, c) {
+                    if (!hasClass(elem, c)) {
+                        elem.className = elem.className + ' ' + c;
+                    }
+                };
+                removeClass = function(elem, c) {
+                    elem.className = elem.className.replace(classReg(c), ' ');
+                };
+            }
+
+            function toggleClass(elem, c) {
+                var fn = hasClass(elem, c) ? removeClass : addClass;
+                fn(elem, c);
+            }
+
+            var classie = {
+                // full names
+                hasClass: hasClass,
+                addClass: addClass,
+                removeClass: removeClass,
+                toggleClass: toggleClass,
+                // short names
+                has: hasClass,
+                add: addClass,
+                remove: removeClass,
+                toggle: toggleClass
+            };
+
+            // transport
+            if (typeof define === 'function' && define.amd) {
+                // AMD
+                define(classie);
+            } else if (typeof exports === 'object') {
+                // CommonJS
+                module.exports = classie;
+            } else {
+                // browser global
+                window.classie = classie;
+            }
+
+        })(window);
+
+        function MultipleUnderline(element, underlineStyles, elementStyles) {
+            //ctor
+            this.element = element;
+
+            this.text = this.element.textContent;
+
+            this.underlineStyles = underlineStyles;
+
+            // this.elementStyles = getElementStyles(element);
+            this.elementStyles = elementStyles;
+
+            this.canvas = document.createElement("canvas");
+            this.ctx = this.canvas.getContext('2d');
+
+
+            this.ratio = window.devicePixelRatio;
+            this.canvas.width = this.elementStyles.width * this.ratio;
+            this.canvas.height = this.elementStyles.height * this.ratio;
+            // this.canvas.height = this.canvas.clientHeight + this.elementStyles.lineHeight;
+            this.canvas.style.left = this.elementStyles.canvasLeft + 'px';
+            this.element.appendChild(this.canvas);
+            this.canvas.style.width = this.elementStyles.width + 'px';
+
+            this.ctx.font = this.font = this.elementStyles.fontStyle + ' ' +
+                multiplyValue(this.elementStyles.fontSize, this.ratio) + ' ' +
+                this.elementStyles.fontFamily;
+
+            this.multipleRedrawActive = false;
+            if (is_chrome) {
+                // chrome floor the lineheight when it is not a whole number
+                // this.elementStyles.lineHeight = Math.floor(this.elementStyles.lineHeight * this.ratio);
+                this.elementStyles.lineHeight = this.elementStyles.lineHeight * this.ratio;
+            } else {
+                this.elementStyles.lineHeight = this.elementStyles.lineHeight * this.ratio;
+            }
+
+            // determine the text-underline-width / strokeWidth
+            var dotWidth = this.ctx.measureText('.')['width'];
+            if (this.underlineStyles['text-underline-width'] == "auto") {
+                // if set to auto, calculate the optimized width based on font
+                this.strokeWidth = dotWidth / 12;
+            } else {
+                //if set to px value, todo: other unit such as em?
+                this.strokeWidth = this.underlineStyles['text-underline-width'];
+                //get number value
+                this.strokeWidth = parseFloat(this.strokeWidth) * this.ratio;
+            }
+
+            // determine the text-underline-position / underlinePosition
+            // text-underline-position in ratio, todo: default and user set position ratio
+            if (this.underlineStyles['text-underline-position'] == "auto") {
+                // if set to auto, calculate the optimized width based on font
+                this.underlinePosition = parseFloat(this.elementStyles.fontSize) * this.ratio *
+                    (1 - this.elementStyles.baselinePositionRatio +
+                        this.elementStyles.baselinePositionRatio * 0.4) +
+                    this.strokeWidth / 2;
+            } else {
+                //if set to ratio value, todo: other unit such as em, px?
+                var userUnderlinePosition = parseFloat(this.underlineStyles['text-underline-position']);
+                // console.log(userUnderlinePosition);
+                this.underlinePosition = parseFloat(this.elementStyles.fontSize) * this.ratio *
+                    (1 - this.elementStyles.baselinePositionRatio +
+                        this.elementStyles.baselinePositionRatio * userUnderlinePosition) +
+                    this.strokeWidth / 2;
+            }
+
+
+            var adjustValue = optimalStrokeWidthPos(this.strokeWidth, this.underlinePosition);
+            this.strokeWidth = adjustValue.strokeWidth;
+            this.underlinePosition = adjustValue.posY;
+
+            this.lines = [];
+            this.myStrings = [];
+
+            var words = this.text.match(/[^\s-]+-?\s?/g);
+            var line = '';
+
+            var linePositionY = 0;
+            var firstLineCount = 0;
+            for (var n = 0; n < words.length; n++) {
+                // add the whitespace after getting the width measurement
+                if (words[n].match(/\s+$/)) {
+                    // the last character of words[n] is whitespace
+                    var newWord = words[n].replace(/\s+$/, '');
+                    var testLine = line + newWord;
+                    var testLineMetrics = this.ctx.measureText(testLine);
+                    var testLineWidth = testLineMetrics.width;
+                    testLine = testLine + ' ';
+                } else {
+                    var testLine = line + words[n];
+                    var testLineMetrics = this.ctx.measureText(testLine);
+                    var testLineWidth = testLineMetrics.width;
+                }
+
+                if (!firstLineCount) {
+                    //the first line, should consider startingPointX
+                    if (testLineWidth + this.elementStyles.textIndent * this.ratio > this.elementStyles.parentWidth * this.ratio && n > 0) {
+                        //  draw the underline
+                        if (line.match(/\s+$/)) {
+                            // the last character of line is whitespace               
+                            var lineMetrics = this.ctx.measureText(line.replace(/\s+$/, ''));
+                            var lineWidth = lineMetrics.width;
+                        } else {
+                            var lineMetrics = this.ctx.measureText(line);
+                            var lineWidth = lineMetrics.width;
+                        }
+
+                        var tempLine = {
+                            lineText: line,
+                            lineTextIndent: this.elementStyles.textIndent * this.ratio - 0.2,
+                            linePositionY: linePositionY,
+                            lineMeasureWidth: lineWidth
+                        }
+                        this.lines.push(tempLine)
+
+                        line = words[n];
+                        linePositionY += this.elementStyles.lineHeight;
+                        firstLineCount++;
+                    } else {
+                        line = testLine;
+                    }
+                } else {
+                    if (testLineWidth > this.elementStyles.parentWidth * this.ratio && n > 0) {
+                        //  draw the underline
+                        if (line.match(/\s+$/)) {
+                            // the last character of line is whitespace               
+                            var lineMetrics = this.ctx.measureText(line.replace(/\s+$/, ''));
+                            var lineWidth = lineMetrics.width;
+                        } else {
+                            var lineMetrics = this.ctx.measureText(line);
+                            var lineWidth = lineMetrics.width;
+                        }
+
+                        var tempLine = {
+                            lineText: line,
+                            lineTextIndent: -0.2,
+                            linePositionY: linePositionY,
+                            lineMeasureWidth: lineWidth
+                        }
+                        this.lines.push(tempLine);
+
+                        line = words[n];
+                        linePositionY += this.elementStyles.lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+            }
+            // draw the last line
+            //  draw the underline
+            if (line.match(/\s+$/)) {
+                // the last character of line is whitespace               
+                var lineMetrics = this.ctx.measureText(line.replace(/\s+$/, ''));
+                var lineWidth = lineMetrics.width;
+            } else {
+                var lineMetrics = this.ctx.measureText(line);
+                var lineWidth = lineMetrics.width;
+            }
+
+            var tempLine = {
+                lineText: line,
+                lineTextIndent: -0.2,
+                linePositionY: linePositionY,
+                lineMeasureWidth: lineWidth
+            }
+            this.lines.push(tempLine);
+            for (var i = 0; i < this.lines.length; i++) {
+                var tempLine = this.lines[i];
+                var myString = new GuitarString(
+                    this.ctx,
+                    new Point(tempLine.lineTextIndent, tempLine.linePositionY + this.underlinePosition),
+                    new Point(tempLine.lineTextIndent + tempLine.lineMeasureWidth, tempLine.linePositionY + this.underlinePosition),
+                    this.strokeWidth, this.underlineStyles['text-underline-color'], this.ratio);
+                this.myStrings.push(myString);
+            }
+
+            this.drawUnderline();
+            this.drawHoles();
+
+        }
+
+        MultipleUnderline.prototype.drawUnderline = function() {
+            // draw the underline
+            for (var i = 0; i < this.myStrings.length; i++) {
+                var tempString = this.myStrings[i];
+                // tempString.clear();
+                tempString.update();
+                tempString.draw();
+            }
+
+        };
+
+
+        MultipleUnderline.prototype.drawHoles = function() {
+            // draw the font stroke
+            for (var i = 0; i < this.lines.length; i++) {
+                var tempLine = this.lines[i];
+
+                this.ctx.globalCompositeOperation = "destination-out";
+                this.ctx.font = this.font;
+
+                this.ctx.fillStyle = 'green';
+                this.ctx.textBaseline = 'top';
+                this.ctx.fillText(tempLine.lineText, tempLine.lineTextIndent, tempLine.linePositionY);
+
+                this.ctx.lineWidth = 2 * this.ratio + this.strokeWidth * 3.6;
+                this.ctx.strokeStyle = 'blue';
+                this.ctx.strokeText(tempLine.lineText, tempLine.lineTextIndent, tempLine.linePositionY);
+
+            }
+        }
+
+        MultipleUnderline.prototype.clear = function() {
+            // clear
+            var lastMultipleRedrawActive = this.multipleRedrawActive;
+            this.multipleRedrawActive = false;
+            for (var i = 0; i < this.myStrings.length; i++) {
+                var tempString = this.myStrings[i];
+                // this.myString.clear();
+                // console.log(tempString.redrawActive);
+                if (tempString.redrawActive) {
+                    this.multipleRedrawActive = true;
+                }
+            }
+            // console.log(this.multipleRedrawActive);
+            if (this.multipleRedrawActive) {
+                console.log('clear now!')
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+            // if (!lastMultipleRedrawActive && this.multipleRedrawActive) {
+            //     for(var i = 0; i < this.myStrings.length; i++) {
+            //         var tempString = this.myStrings[i];
+            //         tempString.drawLine();
+            //     }
+            // }
+
+        };
+
+        MultipleUnderline.prototype.update = function() {
+            //update
+        };
+
+
+        MultipleUnderline.prototype.draw = function() {
+            // draw
+            if (this.multipleRedrawActive) {
+                this.drawUnderline();
+                this.drawHoles();
+            }
+        };
+
+        function MultipleUnderline(element, underlineStyles, elementStyles) {
+            //ctor
+            this.element = element;
+
+            this.text = this.element.textContent;
+
+            this.underlineStyles = underlineStyles;
+
+            // this.elementStyles = getElementStyles(element);
+            this.elementStyles = elementStyles;
+
+            this.canvas = document.createElement("canvas");
+            this.canvas.width = this.elementStyles.width;
+            this.canvas.height = this.elementStyles.height;
+            this.canvas.style.left = this.elementStyles.canvasLeft + 'px';
+            this.element.appendChild(this.canvas);
+            this.canvas.width = this.canvas.clientWidth;
+            this.canvas.height = this.canvas.clientHeight + this.elementStyles.lineHeight;
+
+            this.ctx = this.canvas.getContext('2d');
+            this.ctx.font = this.font = this.elementStyles.fontStyle + ' ' + this.elementStyles.fontSize + ' ' + this.elementStyles.fontFamily;
+
+            this.multipleRedrawActive = false;
+            if (is_chrome) {
+                // chrome floor the lineheight when it is not a whole number
+                this.elementStyles.lineHeight = Math.floor(this.elementStyles.lineHeight);
+            }
+
+
+            // determine the text-underline-width / strokeWidth
+            this.dotWidth = this.ctx.measureText('.')['width'];
+            if (this.underlineStyles['text-underline-width'] == "auto") {
+                // if set to auto, calculate the optimized width based on font
+                if (this.dotWidth / 6 <= 2) {
+                    this.strokeWidth = Math.round(this.dotWidth / 3) / 2;
+                } else {
+                    this.strokeWidth = Math.round(this.dotWidth / 6);
+                }
+            } else {
+                //if set to px value
+                this.strokeWidth = this.underlineStyles['text-underline-width'];
+                //get number value
+                this.strokeWidth = parseFloat(this.strokeWidth);
+            }
+
+            // determine the text-underline-position / underlinePosition
+            // text-underline-position in ratio
+            this.underlinePosition = parseFloat(this.elementStyles.fontSize) * 0.89;
+            if (this.strokeWidth <= 1 || (this.strokeWidth % 2 && this.strokeWidth > 2)) {
+                this.underlinePosition = Math.round(this.underlinePosition - 0.5) + 0.5;
+            } else {
+                this.underlinePosition = Math.round(this.underlinePosition);
+            }
+
+            this.lines = [];
+            this.myStrings = [];
+
+            var words = this.text.match(/[^\s-]+-?\s?/g);
+            var line = '';
+
+            var linePositionY = 0;
+            var firstLineCount = 0;
+            for (var n = 0; n < words.length; n++) {
+                // add the whitespace after getting the width measurement
+                if (words[n].match(/\s+$/)) {
+                    // the last character of words[n] is whitespace
+                    var newWord = words[n].replace(/\s+$/, '');
+                    var testLine = line + newWord;
+                    var testLineMetrics = this.ctx.measureText(testLine);
+                    var testLineWidth = testLineMetrics.width;
+                    testLine = testLine + ' ';
+                } else {
+                    var testLine = line + words[n];
+                    var testLineMetrics = this.ctx.measureText(testLine);
+                    var testLineWidth = testLineMetrics.width;
+                }
+
+                if (!firstLineCount) {
+                    //the first line, should consider startingPointX
+                    if (testLineWidth + this.elementStyles.textIndent > this.elementStyles.parentWidth && n > 0) {
+                        //  draw the underline
+                        if (line.match(/\s+$/)) {
+                            // the last character of line is whitespace               
+                            var lineMetrics = this.ctx.measureText(line.replace(/\s+$/, ''));
+                            var lineWidth = lineMetrics.width;
+                        } else {
+                            var lineMetrics = this.ctx.measureText(line);
+                            var lineWidth = lineMetrics.width;
+                        }
+
+                        var tempLine = {
+                            lineText: line,
+                            lineTextIndent: this.elementStyles.textIndent,
+                            linePositionY: linePositionY,
+                            lineMeasureWidth: lineWidth
+                        }
+                        this.lines.push(tempLine)
+
+                        line = words[n];
+                        linePositionY += this.elementStyles.lineHeight;
+                        firstLineCount++;
+                    } else {
+                        line = testLine;
+                    }
+                } else {
+                    if (testLineWidth > this.elementStyles.parentWidth && n > 0) {
+                        //  draw the underline
+                        if (line.match(/\s+$/)) {
+                            // the last character of line is whitespace               
+                            var lineMetrics = this.ctx.measureText(line.replace(/\s+$/, ''));
+                            var lineWidth = lineMetrics.width;
+                        } else {
+                            var lineMetrics = this.ctx.measureText(line);
+                            var lineWidth = lineMetrics.width;
+                        }
+
+                        var tempLine = {
+                            lineText: line,
+                            lineTextIndent: 0,
+                            linePositionY: linePositionY,
+                            lineMeasureWidth: lineWidth
+                        }
+                        this.lines.push(tempLine);
+
+                        line = words[n];
+                        linePositionY += this.elementStyles.lineHeight;
+                    } else {
+                        line = testLine;
+                    }
+                }
+            }
+            // draw the last line
+            //  draw the underline
+            if (line.match(/\s+$/)) {
+                // the last character of line is whitespace               
+                var lineMetrics = this.ctx.measureText(line.replace(/\s+$/, ''));
+                var lineWidth = lineMetrics.width;
+            } else {
+                var lineMetrics = this.ctx.measureText(line);
+                var lineWidth = lineMetrics.width;
+            }
+
+            var tempLine = {
+                lineText: line,
+                lineTextIndent: 0,
+                linePositionY: linePositionY,
+                lineMeasureWidth: lineWidth
+            }
+            this.lines.push(tempLine);
+
+
+
+            for (var i = 0; i < this.lines.length; i++) {
+                var tempLine = this.lines[i];
+                var myString = new GuitarString(
+                    this.ctx,
+                    new Point(tempLine.lineTextIndent, tempLine.linePositionY + this.underlinePosition),
+                    new Point(tempLine.lineTextIndent + tempLine.lineMeasureWidth, tempLine.linePositionY + this.underlinePosition),
+                    this.strokeWidth, this.underlineStyles['text-underline-color'], 1);
+                this.myStrings.push(myString);
+            }
+
+            this.drawUnderline();
+            this.drawHoles();
+
+        }
+
+
+        MultipleUnderline.prototype.clear = function() {
+            // clear
+            var lastMultipleRedrawActive = this.multipleRedrawActive;
+            this.multipleRedrawActive = false;
+            for (var i = 0; i < this.myStrings.length; i++) {
+                var tempString = this.myStrings[i];
+                // this.myString.clear();
+                // console.log(tempString.redrawActive);
+                if (tempString.redrawActive) {
+                    this.multipleRedrawActive = true;
+                }
+            }
+            // console.log(this.multipleRedrawActive);
+            if (this.multipleRedrawActive) {
+                console.log('clear now!')
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+            // if (!lastMultipleRedrawActive && this.multipleRedrawActive) {
+            //     for(var i = 0; i < this.myStrings.length; i++) {
+            //         var tempString = this.myStrings[i];
+            //         tempString.drawLine();
+            //     }
+            // }
+
+        };
+
+        MultipleUnderline.prototype.update = function() {
+            //update
+        };
+
+
+        MultipleUnderline.prototype.draw = function() {
+            // draw
+            if (this.multipleRedrawActive) {
+                this.drawUnderline();
+                this.drawHoles();
+            }
+        };
+
+
+        MultipleUnderline.prototype.drawUnderline = function() {
+            // draw the underline
+            for (var i = 0; i < this.myStrings.length; i++) {
+                var tempString = this.myStrings[i];
+                // tempString.clear();
+                tempString.update();
+                tempString.draw();
+            }
+
+        };
+
+
+        MultipleUnderline.prototype.drawHoles = function() {
+            // draw the font stroke
+            for (var i = 0; i < this.lines.length; i++) {
+                var tempLine = this.lines[i];
+
+                this.ctx.globalCompositeOperation = "destination-out";
+                this.ctx.font = this.font;
+                this.ctx.fillStyle = 'green';
+                this.ctx.textBaseline = 'top';
+                this.ctx.fillText(tempLine.lineText, tempLine.lineTextIndent, tempLine.linePositionY);
+                this.ctx.lineWidth = 3 + this.strokeWidth;
+                this.ctx.strokeStyle = 'blue';
+                this.ctx.strokeText(tempLine.lineText, tempLine.lineTextIndent, tempLine.linePositionY);
+
+            }
+        }
+
+        var multiplyValue = function(value, multiplier) {
+            var str = value;
+            var m = multiplier;
+            var result = str.match(/(\d*\.?\d*)(.*)/);
+            //http://stackoverflow.com/questions/2868947/split1px-into-1px-1-px-in-javascript
+            return result[1] * m + result[2];
+        }
+
+        var optimalStrokeWidthPos = function(strokeWidth, posY) {
+            if (strokeWidth < 1) {
+                posY = Math.round(posY - 0.5) + 0.5;
+            } else if (strokeWidth >= 1) {
+                strokeWidth = Math.round(strokeWidth);
+                if (strokeWidth % 2) {
+                    // odd, posY -> 0.5
+                    posY = Math.round(posY - 0.5) + 0.5;
+                } else {
+                    // even, posY -> 1
+                    posY = Math.round(posY);
+                }
+            }
+            return {
+                strokeWidth: strokeWidth,
+                posY: posY
+            }
+        }
+
+        function SingleUnderline(element, underlineStyles, elementStyles) {
+            //ctor
+            this.element = element;
+
+            this.text = this.element.textContent;
+
+            this.underlineStyles = underlineStyles;
+
+            this.elementStyles = elementStyles;
+            this.redrawActive = false;
+
+            this.canvas = document.createElement("canvas");
+            this.ctx = this.canvas.getContext('2d');
+
+            this.ratio = window.devicePixelRatio;
+            this.canvas.width = this.elementStyles.width * this.ratio;
+            this.canvas.height = this.elementStyles.height * this.ratio;
+            this.element.appendChild(this.canvas);
+            this.canvas.style.width = this.elementStyles.width + 'px';
+
+            this.ctx.font = this.font = this.elementStyles.fontStyle + ' ' +
+                multiplyValue(this.elementStyles.fontSize, this.ratio) + ' ' +
+                this.elementStyles.fontFamily;
+
+            // determine the text-underline-width / strokeWidth
+            var dotWidth = this.ctx.measureText('.')['width'];
+            if (this.underlineStyles['text-underline-width'] == "auto") {
+                // if set to auto, calculate the optimized width based on font
+                this.strokeWidth = dotWidth / 12;
+            } else {
+                //if set to px value, todo: other unit such as em?
+                this.strokeWidth = this.underlineStyles['text-underline-width'];
+                //get number value
+                this.strokeWidth = parseFloat(this.strokeWidth) * this.ratio;
+            }
+
+
+            // determine the text-underline-position / underlinePosition
+            // text-underline-position in ratio, todo: default and user set position ratio
+            if (this.underlineStyles['text-underline-position'] == "auto") {
+                // if set to auto, calculate the optimized width based on font
+                // console.log(this.elementStyles.baselinePositionRatio);
+                this.underlinePosition = parseFloat(this.elementStyles.height) * this.ratio *
+                    (1 - this.elementStyles.baselinePositionRatio +
+                        this.elementStyles.baselinePositionRatio * 0.4) +
+                    this.strokeWidth / 2;
+            } else {
+                //if set to ratio value, todo: other unit such as em, px?
+                var userUnderlinePosition = parseFloat(this.underlineStyles['text-underline-position']);
+                // console.log(this.elementStyles.baselinePositionRatio);
+                this.underlinePosition = parseFloat(this.elementStyles.height) * this.ratio *
+                    (1 - this.elementStyles.baselinePositionRatio +
+                        this.elementStyles.baselinePositionRatio * userUnderlinePosition) +
+                    this.strokeWidth / 2;
+            }
+
+            var adjustValue = optimalStrokeWidthPos(this.strokeWidth, this.underlinePosition);
+            this.strokeWidth = adjustValue.strokeWidth;
+            this.underlinePosition = adjustValue.posY;
+
+            // todo: if last character is a space, remove the space
+            textWidth = this.ctx.measureText(this.text).width;
+
+            this.myString = new GuitarString(this.ctx,
+                new Point(0, this.underlinePosition),
+                new Point(textWidth, this.underlinePosition),
+                this.strokeWidth, this.underlineStyles['text-underline-color'], this.ratio);
+            this.drawHoles();
+
+        }
+
+        SingleUnderline.prototype.drawUnderline = function() {
+            //  draw the underline
+            this.myString.draw();
+        }
+
+        SingleUnderline.prototype.drawHoles = function() {
+            // draw the font stroke             
+            this.ctx.font = this.font;
+            this.ctx.textBaseline = 'top';
+
+            this.ctx.globalCompositeOperation = "destination-out";
+
+            this.ctx.lineWidth = 2 * this.ratio + this.strokeWidth * 3.6;
+            this.ctx.strokeStyle = 'blue';
+            this.ctx.beginPath();
+            this.ctx.strokeText(this.text, -0.2, 0);
+
+            this.ctx.fillStyle = 'green';
+            this.ctx.beginPath();
+            this.ctx.fillText(this.text, -0.2, 0);
+        }
+
+        SingleUnderline.prototype.clear = function() {
+            this.redrawActive = this.myString.redrawActive;
+            // clear
+            if (this.myString.redrawActive) {
+                // this.myString.clear();
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+        };
+
+
+        SingleUnderline.prototype.update = function() {
+            // update
+            if (this.myString.redrawActive) {
+                this.myString.update();
+            }
+        };
+
+
+        SingleUnderline.prototype.draw = function() {
+            // draw
+            if (this.redrawActive) {
+                this.drawUnderline();
+                this.drawHoles();
+            }
+        };
+
+        var getElementStyles = function(element) {
+            // lineHeight, height, ratio, fontFamily, fontSize, fontStyle
+            var $this = element;
+
+            var baselinePositionRatio = baselineRatio(element);
+            var lineHeight = parseFloat(window.getComputedStyle($this, null)
+                .getPropertyValue("line-height"));
+            var fontFamily = window.getComputedStyle($this, null)
+                .getPropertyValue("font-family");
+            var fontSize = window.getComputedStyle($this, null)
+                .getPropertyValue("font-size");
+            var fontStyle = window.getComputedStyle($this, null)
+                .getPropertyValue("font-style");
+            var width = $this.getBoundingClientRect().width;
+            var height = $this.getBoundingClientRect().height;
+            var parentWidth = $this.parentNode.getBoundingClientRect().width;
+
+
+            var offsetLeft = $this.offsetLeft;
+            var parentOffsetLeft = $this.parentNode.offsetLeft;
+            var canvasLeft = parentOffsetLeft - offsetLeft;
+            var textIndent = offsetLeft - parentOffsetLeft;
+
+            // canvas.style.left= canvasLeft + 'px';   
+            return {
+                lineHeight: lineHeight,
+                width: width,
+                height: height,
+                parentWidth: parentWidth,
+                fontFamily: fontFamily,
+                fontSize: fontSize,
+                fontStyle: fontStyle,
+                baselinePositionRatio: baselinePositionRatio,
+                canvasLeft: canvasLeft,
+                textIndent: textIndent
+            }
+        };
+
+        window.requestAnimFrame = (function(callback) {
+            return window.requestAnimationFrame || window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || window.oRequestAnimationFrame || window.msRequestAnimationFrame ||
+                function(callback) {
+                    window.setTimeout(callback, 1000 / 60);
+                };
+        })();
+
+        var myUnderlines = [];
+        var myMultipleUnderlines = [];
+        window.onload = function() {
+            var underlineElements = document.querySelectorAll(".underline");
+            for (var n = 0; n < underlineElements.length; n++) {
+
+                var element = underlineElements[n];
+
+                var underlineStyles = {
+                    'text-underline-color': '#000',
+                    'text-underline-position': 'auto', // could be ratio or todo: px 
+                    'text-underline-skip': true,
+                    'text-underline-width': 'auto' // could be auto or px or ratio
+                }
+
+
+                var elementStyles = getElementStyles(element);
+                // single line or multiple line?
+                if (elementStyles.height > elementStyles.lineHeight) {
+                    // multiple lines
+                    // console.log('multiple lines');
+                    var myUnderline = new MultipleUnderline(element, underlineStyles, elementStyles);
+                    // myUnderline.update();
+                    // myUnderline.draw();
+                    myUnderlines.push(myUnderline);
+                } else {
+                    // single line
+                    var myUnderline = new SingleUnderline(element, underlineStyles, elementStyles);
+                    myUnderlines.push(myUnderline);
+                }
+
+                // if(window.device)
+            }
+        }
+
+
+        function animate() {
+
+            for (var i = 0; i < myUnderlines.length; i++) {
+                var myUnderline = myUnderlines[i];
+
+                // clear
+                myUnderline.clear();
+
+                // update
+                myUnderline.update();
+
+                // draw stuff
+                myUnderline.draw();
+            }
+
+
+            // request new frame
+            requestAnimFrame(function() {
+                animate();
+            });
+        }
+        animate();
+
+        //audio play multiple channels at the same time: http://www.storiesinflight.com/html5/audio.html
+        var channel_max = 10; // number of channels
+        audiochannels = new Array();
+        for (a = 0; a < channel_max; a++) { // prepare the channels
+            audiochannels[a] = new Array();
+            audiochannels[a]['channel'] = new Audio(); // create a new audio object
+            audiochannels[a]['finished'] = -1; // expected end time for this channel
+        }
+
+        function play_multi_sound(s) {
+            for (a = 0; a < audiochannels.length; a++) {
+                thistime = new Date();
+                if (audiochannels[a]['finished'] < thistime.getTime()) { // is this channel finished?
+                    audiochannels[a]['finished'] = thistime.getTime() + document.getElementById(s).duration * 1000;
+                    audiochannels[a]['channel'].src = document.getElementById(s).src;
+                    audiochannels[a]['channel'].load();
+                    audiochannels[a]['channel'].play();
+                    break;
+                }
+            }
+        }
+
+        var is_chrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+
+
+        var circleCenter = function(startPoint, thirdPoint, endPoint) {
+            var dy1 = thirdPoint.y - startPoint.y;
+            var dx1 = thirdPoint.x - startPoint.x;
+            var dy2 = endPoint.y - thirdPoint.y;
+            var dx2 = endPoint.x - thirdPoint.x;
+
+            var aSlope = dy1 / dx1;
+            var bSlope = dy2 / dx2;
+
+
+            var centerX = (aSlope * bSlope * (startPoint.y - endPoint.y) + bSlope * (startPoint.x + thirdPoint.x) -
+                aSlope * (thirdPoint.x + endPoint.x)) / (2 * (bSlope - aSlope));
+            var centerY = -1 * (centerX - (startPoint.x + thirdPoint.x) / 2) / aSlope + (startPoint.y + thirdPoint.y) / 2;
+            var r = dist(centerX, centerY, startPoint.x, startPoint.y)
+
+            return {
+                x: centerX,
+                y: centerY,
+                r: r
+            };
+        }
+
+        var dist = function(x, y, x0, y0) {
+            return Math.sqrt((x -= x0) * x + (y -= y0) * y);
+        };
+
+        var Point = function(x, y) {
+            this.x = x;
+            this.y = y;
+        }
+
+
+        var intersects = function(a, b, c, d, p, q, r, s) {
+            // returns true if the line from (a,b)->(c,d) intersects with (p,q)->(r,s)
+            var det, gamma, lambda;
+            det = (c - a) * (s - q) - (r - p) * (d - b);
+            if (det === 0) {
+                return false;
+            } else {
+                lambda = ((s - q) * (r - a) + (p - r) * (s - b)) / det;
+                gamma = ((b - d) * (r - a) + (c - a) * (s - b)) / det;
+                return (0 < lambda && lambda < 1) && (0 < gamma && gamma < 1);
+            }
+        };
+
+        var musicLevel = function(startPoint, endPoint, ratio) {
+            var length = dist(startPoint.x, startPoint.y, endPoint.x, endPoint.y) / ratio;
+
+            level = Math.floor(length / 30);
+            if (level > 19) {
+                level = 19;
+            }
+            level = 19 - level
+            if (level < 10) {
+                level = '0' + level
+            }
+            return level;
+        };
+
+        function GuitarString(ctx, startPoint, endPoint, strokeWidth, strokeColor, ratio) {
+            //ctor
+            this.ctx = ctx;
+            this.canvas = ctx.canvas;
+            this.startPoint = startPoint;
+            this.endPoint = endPoint;
+            this.strokeWidth = strokeWidth;
+            this.strokeColor = strokeColor;
+            this.ratio = ratio;
+
+            this.level = musicLevel(this.startPoint, this.endPoint, this.ratio);
+
+            // this.canvas.width = this.canvas.clientWidth;
+            // this.canvas.height = this.canvas.clientHeight*1.2;
+
+            this.maxGrabDistance = this.strokeWidth * 2;
+            this.maxControlDistance = this.strokeWidth * 6;
+
+            this.ctx.lineWidth = this.strokeWidth;
+            this.ctx.strokeStyle = this.strokeColor;
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.startPoint.x, this.startPoint.y);
+            this.ctx.lineTo(this.endPoint.x, this.endPoint.y);
+            this.ctx.globalCompositeOperation = "source-over";
+            this.ctx.stroke();
+
+            this.currentMouseX;
+            this.currentMouseY;
+            this.lastMouseX;
+            this.lastMouseY;
+            this.waveInitX = (this.startPoint.x + this.endPoint.x) / 2;
+            this.waveInitY = this.startPoint.y - this.maxControlDistance;
+            this.waveCount = 0;
+            this.damping = 0.9;
+
+            this.thirdPoint = new Point((this.startPoint.x + this.endPoint.x) / 2, this.startPoint.y);
+
+
+            // state flags
+            this.userInControl = false;
+            this.userPlucked = false;
+            this.waveInControl = false;
+            this.waveFinished = false;
+            this.initState = true;
+            this.lastRedraw = false;
+            this.redrawActive = false;
+
+            //add event listener
+            var self = this;
+            this.canvas.addEventListener('mouseover', function(event) {
+                self.mouseOver(self, event);
+            }, false);
+
+            this.canvas.addEventListener('mousemove', function(event) {
+                self.mouseMove(self, event);
+            }, false);
+
+            this.canvas.addEventListener("mouseleave", function(event) {
+                self.mouseLeave(self, event);
+            }, false);
+
+            this.canvas.addEventListener("mouseout", function(event) {
+                self.mouseOut(self, event);
+            }, false);
+
+            this.canvas.addEventListener("touchstart", function(event) {
+                self.touchDown(self, event);
+            }, false);
+            this.canvas.addEventListener("touchmove", function(event) {
+                self.touchXY(self, event);
+            }, false);
+            this.canvas.addEventListener("touchend", function(event) {
+                self.touchUp(self, event);
+            }, false);
+
+        }
+
+        GuitarString.prototype.mouseOver = function(self, event) {
+            // console.log('mouseOver');
+            this.currentMouseX = event.layerX * this.ratio;
+            this.currentMouseX = event.layerY * this.ratio;
+        };
+        GuitarString.prototype.mouseMove = function(self, event) {
+            // console.log('mouseMove');
+            this.lastMouseX = this.currentMouseX;
+            this.lastMouseY = this.currentMouseY;
+            this.currentMouseX = event.layerX * this.ratio;
+            this.currentMouseY = event.layerY * this.ratio;
+
+            var radius = circleCenter(new Point(this.startPoint.x, this.startPoint.y),
+                new Point(this.currentMouseX, this.currentMouseY),
+                new Point(this.endPoint.x, this.endPoint.y)).r;
+            var currentWaveDistance = radius - Math.sqrt(Math.pow(radius, 2) - Math.pow((Math.abs(this.endPoint.x - this.startPoint.x)) / 2, 2));
+            var lastRadius = circleCenter(new Point(this.startPoint.x, this.startPoint.y),
+                new Point(this.lastMouseX, this.lastMouseY),
+                new Point(this.endPoint.x, this.endPoint.y)).r;
+            var lastWaveDistance = lastRadius - Math.sqrt(Math.pow(lastRadius, 2) -
+                Math.pow((Math.abs(this.endPoint.x - this.startPoint.x)) / 2, 2));
+
+
+
+            var mouseInGrabRange = currentWaveDistance < this.maxGrabDistance &&
+                this.currentMouseX > this.startPoint.x &&
+                this.currentMouseX < this.endPoint.x;
+
+            var lastMouseOutGrabRange = !(lastWaveDistance < this.maxGrabDistance &&
+                this.lastMouseX > this.startPoint.x &&
+                this.lastMouseX < this.endPoint.x);
+
+            var mouseOutControlRange = !(currentWaveDistance < this.maxControlDistance &&
+                this.currentMouseX > this.startPoint.x &&
+                this.currentMouseX < this.endPoint.x);
+
+            var lastMouseInControlRange = lastWaveDistance < this.maxControlDistance &&
+                this.lastMouseX > this.startPoint.x &&
+                this.lastMouseY < this.endPoint.x;
+
+            var mouseCrossed = intersects(this.lastMouseX, this.lastMouseY,
+                this.currentMouseX, this.currentMouseY,
+                this.startPoint.x, this.startPoint.y,
+                this.endPoint.x, this.endPoint.y);
+
+            if (mouseInGrabRange && lastMouseOutGrabRange && (!this.userInControl)) {
+                // console.log('grab!');
+                this.initState = false;
+                this.userInControl = true;
+                this.waveInControl = false;
+                this.waveFinished = false;
+
+                this.redrawActive = true;
+            } else if (mouseOutControlRange && lastMouseInControlRange && this.userInControl) {
+                // console.log('boing!');
+                this.initState = false;
+                this.userInControl = false;
+                this.waveInControl = true;
+                this.waveFinished = false;
+                this.waveCount = 0;
+                // this.waveInitX = this.lastMouseX;
+                // this.waveInitY = this.lastMouseY;
+                this.waveInitX = (this.startPoint.x + this.endPoint.x) / 2;
+                this.waveInitY = this.endPoint.y + this.maxControlDistance;
+                // play audio
+                play_multi_sound('audio' + this.level);
+                // createjs.Sound.play('cello_' + this.level);
+
+            }
+
+            if ((!this.userInControl) && mouseCrossed) {
+                // console.log('i just plucked!');
+                this.initState = false;
+                this.userInControl = false;
+                this.waveInControl = true;
+                this.waveFinished = false;
+                this.redrawActive = true;
+                this.waveCount = 0;
+                this.waveInitX = (this.startPoint.x + this.endPoint.y) / 2;
+                this.waveInitY = this.endPoint.y + this.maxGrabDistance * 2 / 3;
+            }
+        };
+        GuitarString.prototype.mouseLeave = function(self, event) {
+            // console.log('mouseLeave');
+            if (this.userInControl) {
+                this.initState = false;
+                this.userInControl = false;
+                this.waveInControl = true;
+                this.waveFinished = false;
+                this.redrawActive = true;
+                this.waveCount = 0;
+
+                this.waveInitX = event.layerX * this.ratio;
+                this.waveInitY = event.layerY * this.ratio;
+
+            }
+        };
+        GuitarString.prototype.mouseOut = function(self, event) {
+            // console.log('mouseOut');
+        };
+        GuitarString.prototype.touchDown = function(self, event) {
+            // console.log('touchDown');
+            this.currentMouseX = event.layerX * this.ratio;
+            this.currentMouseX = event.layerY * this.ratio;
+        };
+        GuitarString.prototype.touchXY = function(self, event) {
+            // console.log('touchMove');
+            this.lastMouseX = this.currentMouseX;
+            this.lastMouseY = this.currentMouseY;
+            this.currentMouseX = event.layerX * this.ratio;
+            this.currentMouseY = event.layerY * this.ratio;
+
+            var radius = circleCenter(new Point(this.startPoint.x, this.startPoint.y),
+                new Point(this.currentMouseX, this.currentMouseY),
+                new Point(this.endPoint.x, this.endPoint.y)).r;
+            var currentWaveDistance = radius - Math.sqrt(Math.pow(radius, 2) - Math.pow((Math.abs(this.endPoint.x - this.startPoint.x)) / 2, 2));
+            var lastRadius = circleCenter(new Point(this.startPoint.x, this.startPoint.y),
+                new Point(this.lastMouseX, this.lastMouseY),
+                new Point(this.endPoint.x, this.endPoint.y)).r;
+            var lastWaveDistance = lastRadius - Math.sqrt(Math.pow(lastRadius, 2) -
+                Math.pow((Math.abs(this.endPoint.x - this.startPoint.x)) / 2, 2));
+
+
+
+            var mouseInGrabRange = currentWaveDistance < this.maxGrabDistance &&
+                this.currentMouseX > this.startPoint.x &&
+                this.currentMouseX < this.endPoint.x;
+
+            var lastMouseOutGrabRange = !(lastWaveDistance < this.maxGrabDistance &&
+                this.lastMouseX > this.startPoint.x &&
+                this.lastMouseX < this.endPoint.x);
+
+            var mouseOutControlRange = !(currentWaveDistance < this.maxControlDistance &&
+                this.currentMouseX > this.startPoint.x &&
+                this.currentMouseX < this.endPoint.x);
+
+            var lastMouseInControlRange = lastWaveDistance < this.maxControlDistance &&
+                this.lastMouseX > this.startPoint.x &&
+                this.lastMouseY < this.endPoint.x;
+
+            var mouseCrossed = intersects(this.lastMouseX, this.lastMouseY,
+                this.currentMouseX, this.currentMouseY,
+                this.startPoint.x, this.startPoint.y,
+                this.endPoint.x, this.endPoint.y);
+
+            if (mouseInGrabRange && lastMouseOutGrabRange && (!this.userInControl)) {
+                // console.log('grab!');
+                this.initState = false;
+                this.userInControl = true;
+                this.waveInControl = false;
+                this.waveFinished = false;
+
+                this.redrawActive = true;
+            } else if (mouseOutControlRange && lastMouseInControlRange && this.userInControl) {
+                // console.log('boing!');
+                this.initState = false;
+                this.userInControl = false;
+                this.waveInControl = true;
+                this.waveFinished = false;
+                this.waveCount = 0;
+                // this.waveInitX = this.lastMouseX;
+                // this.waveInitY = this.lastMouseY;
+                this.waveInitX = (this.startPoint.x + this.endPoint.x) / 2;
+                this.waveInitY = this.endPoint.y + this.maxControlDistance;
+                // play audio
+                play_multi_sound('audio' + this.level);
+
+            }
+
+            if ((!this.userInControl) && mouseCrossed) {
+                // console.log('i just plucked!');
+                this.initState = false;
+                this.userInControl = false;
+                this.waveInControl = true;
+                this.waveFinished = false;
+                this.redrawActive = true;
+                this.waveCount = 0;
+                this.waveInitX = (this.startPoint.x + this.endPoint.y) / 2;
+                this.waveInitY = this.endPoint.y + this.maxGrabDistance * 2 / 3;
+                // play audio
+                // play_multi_sound('audio' + this.level);
+
+            }
+        };
+        GuitarString.prototype.touchUp = function(self, event) {
+            // console.log('touchUp');
+            if (this.userInControl) {
+                this.initState = false;
+                this.userInControl = false;
+                this.waveInControl = true;
+                this.waveFinished = false;
+                this.redrawActive = true;
+                this.waveCount = 0;
+
+                this.waveInitX = event.layerX * this.ratio;
+                this.waveInitY = event.layerY * this.ratio;
+
+            }
+        };
+
+
+        GuitarString.prototype.clear = function() {
+            // clear
+            // if(this.redrawActive){
+            // this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            // }
+        };
+
+        GuitarString.prototype.update = function() {
+            // console.log(this.redrawActive);
+            // if(this.redrawActive){
+            if (this.userInControl) {
+                this.thirdPoint = new Point(this.currentMouseX, this.currentMouseY);
+            }
+            if (this.waveInControl) {
+                var waveX = this.waveInitX;
+                var waveY = this.startPoint.y +
+                    (this.waveInitY - this.startPoint.y) *
+                    Math.cos(this.waveCount / 5 * Math.PI) *
+                    Math.pow(this.damping, this.waveCount);
+
+                if (Math.pow(this.damping, this.waveCount) > 0.03) {
+                    // still waving ....
+                    this.thirdPoint = new Point(waveX, waveY);
+                    this.waveCount++;
+                } else {
+                    // wave damped to a straight line, wave is finished
+                    this.waveInControl = false;
+                    this.waveFinished = true;
+                    this.lastRedraw = true;
+                    this.thirdPoint = new Point(waveX, waveY);
+                }
+            }
+            // }
+        }
+
+        GuitarString.prototype.draw = function() {
+            // if(this.redrawActive){   
+            // draw stuff
+            // }
+            if (this.lastRedraw) {
+                this.drawLine();
+                this.lastRedraw = false;
+                this.redrawActive = false;
+            } else {
+                this.drawArc(this.startPoint, this.thirdPoint, this.endPoint);
+            }
+        };
+        GuitarString.prototype.drawLine = function() {
+            // draw a line instead of a flat curve when it stops redraw, pixel-perfect  
+            this.ctx.lineWidth = this.strokeWidth;
+            this.ctx.strokeStyle = this.strokeColor;
+            this.ctx.beginPath();
+            this.ctx.moveTo(this.startPoint.x, this.startPoint.y);
+            this.ctx.lineTo(this.endPoint.x, this.endPoint.y);
+            this.ctx.globalCompositeOperation = "source-over";
+            this.ctx.stroke();
+        };
+
+
+        GuitarString.prototype.drawArc = function(startPoint, thirdPoint, endPoint) {
+            var ctx = this.ctx;
+            ctx.lineWidth = this.strokeWidth;
+            ctx.strokeStyle = this.strokeColor;
+
+            var centerObject = circleCenter(new Point(startPoint.x, startPoint.y),
+                new Point(thirdPoint.x, thirdPoint.y),
+                new Point(endPoint.x, endPoint.y));
+            var centerX = centerObject.x;
+            var centerY = centerObject.y;
+            var r = centerObject.r
+
+            var angle = Math.atan2(centerX - startPoint.x, centerY - startPoint.y);
+            // console.log(centerObject);
+            if (!angle) {
+                ctx.beginPath();
+                ctx.moveTo(startPoint.x, startPoint.y);
+                ctx.lineTo(endPoint.x, endPoint.y);
+            } else {
+                if (angle > Math.PI / 2) {
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, r, Math.PI * 1.5 - angle, Math.PI * 1.5 + angle, true);
+                } else {
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, r, Math.PI * 1.5 - angle, Math.PI * 1.5 + angle, false);
+                }
+            }
+            ctx.globalCompositeOperation = "source-over";
+            ctx.stroke();
+
+        }
+    </script>
+</head>
+
+<body>
+    <p>
+        <a href="#" class="underline title">Underline</a>
+    </p>
+    <p class="text">
+        <a href="#" class="underline">Testing descenders</a>
+        <br>
+        <a href="#" class="underline">to see g and y and p</a>
+        <br>
+        <a href="#" class="underline">with a nice underline</a>
+        <br>
+        <a href="#" class="underline">jump google quick yogurt</a>
+        <br>
+        <a href="#" class="underline">spanning multiple lines is still broken though...</a>
+        <br>
+    </p>
+</body>
+
+</html>
