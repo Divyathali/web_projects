@@ -1,0 +1,547 @@
+<html>
+    <head>
+        <meta http-equiv="Content-type" content="text/html; charset=utf-8">
+        <title>TV shows</title>
+        <style type="text/css" media="screen">
+                   
+            .card {
+                background-color: white;  
+                margin-left:30%; 
+                width:30%;
+                padding:10px;
+                border:1px solid green;
+                position:center; 
+
+            }
+            #row2{
+                padding:30px;
+            }
+           
+            #myInput,
+            #myInput1,
+            #myInput2,
+            #myInput3,
+            #myInput4,
+            #myInput5,
+            #myInput6,
+            #myInput7,
+            #myInput8,
+            #myInput9,
+            #myInput10 {
+                position:center;
+                background-position: 10px 10px;
+                background-repeat: no-repeat;
+                width:90%;
+                padding: 12px 20px 12px 40px;
+                border: 1px solid #ddd;
+                margin-bottom: 12px;
+            }
+            main {
+                display: absolute;
+                justify-content: center;
+                }
+
+            table {
+                position:absolute;
+                
+                max-width: 100%;
+
+            }
+
+            tr:nth-child(odd) {
+                background-color: #eee;
+            }
+
+            th {
+                background-color:rgb(112, 201, 236);
+                color: #fff;
+                text-align:center;
+                padding: 0.5em 1em;
+            }
+
+            td {
+                text-align:center;
+                padding: 0.5em 1em;
+            }
+            b{
+                color:red;
+            }
+        </style>
+        <script>
+            function search1(){
+                    
+                fetch('https://www.anapioficeandfire.com/api/books')
+                .then(res => res.json())
+                .then(res => 
+                {                 
+                    var x=document.getElementById('row2');
+                    var table=document.createElement('table');
+                    table.id="myTable";
+                    var arr=['NAME','AUTHOR','PUBLISHER','RELEASE','NUMBER OF PAGES','ISBN','COUNTRY','CHARECTERS','POV CHARECTERS','OFFICIAL URL'];
+                        for(var j=0;j<=9;j++)
+                        {
+                            var th=document.createElement('th');
+                            th.innerHTML= arr[j];
+                            table.append(th);
+                        }
+
+                        var len=res.length;  
+
+                        for(let i=0;i<len;i++)
+                        { 
+                            var tr=document.createElement('tr');
+
+                            var ts=document.createElement('td');
+                            ts.innerHTML=res[i].name;
+                            tr.append(ts);
+                            
+                            var td=document.createElement('td');
+                            td.innerHTML=res[i].authors[0];
+                            tr.append(td);
+                            
+                            var td1=document.createElement('td');
+                            td1.innerHTML=res[i].publisher;
+                            tr.append(td1);
+                        
+                            var td2=document.createElement('td');
+                            var text=res[i].released.split('T');                        
+                            td2.innerHTML=text[0];
+                            tr.append(td2);
+                        
+                            var td3=document.createElement('td');
+                            td3.innerHTML=res[i].numberOfPages;          
+                            tr.append(td3);
+                            
+                            var td4=document.createElement('td');
+
+                            td4.innerHTML=res[i].isbn;
+                            tr.append(td4);
+                            
+                            var td5=document.createElement('td');
+                            td5.innerHTML=res[i].country;
+                            tr.append(td5);
+                        
+                            var td6=document.createElement('td');            
+                            td6.innerHTML= res[i].characters.length;
+                            tr.append(td6);
+
+                            var td7=document.createElement('td');
+                            ar1=document.createElement('div'); 
+                            var arr1=[],text='';                           
+                            ar1.innerHTML=res[i].povCharacters.length;
+                            for(var j=0;j<res[i].povCharacters.length;j++){
+                                console.log(res[i].povCharacters[j])
+                                fetch(res[i].povCharacters[j])
+                                .then(res1=> res1.json())
+                                .then(res1=>{
+                                    console.log(res1.name.length); 
+                                    arr1.push(res1.name);                                 
+                                    
+                                    let uniqueChars = [];
+                                    arr1.forEach((c) => {
+                                        if (!uniqueChars.includes(c)) {
+                                            uniqueChars.push(c);
+                                        }
+                                    });                                                                                          
+                                    //console.log(uniqueChars)
+                                    //ar1.innerHTML=text;                               
+                                })
+                                arr1=[];
+                            }
+                            
+                            td7.append(ar1);
+                            tr.append(td7);
+
+                            var td8=document.createElement('td');
+                            var ar2=document.createElement('a');
+                            ar2.setAttribute('href', "'"+res[i].url+"'")
+                            ar2.innerHTML=res[i].url;
+                            td8.append(ar2);
+                            tr.append(td8);
+                            table.append(tr);         
+                        }
+                        x.append(table);
+                        
+                    })
+                .catch((error) => {
+                    alert(error);
+                    console.error('Error:', error);
+                });                
+            }
+            
+            function search2(){
+
+                fetch('https://www.anapioficeandfire.com/api/books')
+                .then(res => res.json())
+                .then(res => 
+                {          
+                        var len=res.length;  
+
+                        for(let i=0;i<len;i++)
+                        { 
+                            
+                            var text='',arr5=[];                                          
+                            var x=document.getElementById('row2');         
+                            var table=document.createElement('table');
+                            table.id='myTable';
+                            var arr1=['URL','NAME','GENDER','CULTURE','BORN','DIED','TITLES','ALIASES','ALLEGIANCES','BOOKS','TV SERIES'];
+                            for (var s=0;s<arr1.length;s++){
+                                var thr=document.createElement('th');
+                                thr.innerHTML= arr1[s];
+                                table.append(thr);
+                            }
+                            for(var z=0;z<res[i].characters.length;z++){
+                                fetch(res[i].characters[z])
+                                .then(res1 => res1.json())
+                                .then(res1 =>{        
+                                    console.log(res1.length);                    
+                                    var t1=document.createElement('tr');
+                                    var tdr1=document.createElement('td');
+                                    tdr1.innerHTML=res1.url;
+                                    arr5.push(res1.url);
+                                    console.log(arr5);
+                                    t1.append(tdr1);
+
+                                    var tdr2=document.createElement('td');
+                                    tdr2.innerHTML=res1.name;
+                                    t1.append(tdr2);
+
+                                    var tdr3=document.createElement('td');
+                                    tdr3.innerHTML=res1.gender;
+                                    t1.append(tdr3);
+
+                                    var tdr4=document.createElement('td');
+                                    tdr4.innerHTML=res1.culture;
+                                    t1.append(tdr4);
+
+                                    var tdr5=document.createElement('td');
+                                    tdr5.innerHTML=res1.born;
+                                    t1.append(tdr5);
+
+                                    var tdr6=document.createElement('td');
+                                    tdr6.innerHTML=res1.died;
+                                    t1.append(tdr6);
+
+                                    var tdr7=document.createElement('td');
+                                    tdr7.innerHTML=res1.titles[0];
+                                    t1.append(tdr7);
+
+                                    var tdr8=document.createElement('td');
+                                    tdr8.innerHTML=res1.aliases[0];
+                                    t1.append(tdr8);
+
+                                    var tdr9=document.createElement('td');
+                                    text='';
+                                    for(var c=0;c<res1.allegiances.length;c++ ){
+                                        text+=res1.allegiances[c]+'\n';
+                                    }
+                                    tdr9.innerHTML=text;
+                                    t1.append(tdr9);
+
+                                    var tdr10=document.createElement('td');
+                                    text="";
+                                    for(var a=0;a<res1.books.length;a++ ){
+                                        text+=res1.books[a]+'\n';
+                                    }
+                                    tdr10.innerHTML=text;
+                                    t1.append(tdr10);
+
+                                    var tdr11=document.createElement('td');
+                                    text='';
+                                    for(var b=0;b<res1.tvSeries;b++ ){
+                                        text+=res1.tvSeries[b]+'\n';
+                                    }
+                                    tdr11.innerHTML=text;
+                                    t1.append(tdr11);
+
+
+                                    table.append(t1);
+                                    x.append(table); 
+                                })
+                                .catch(error=>{
+                                    alert(error);
+                                    console.log(error);
+                                })
+                                
+                            }
+                        }
+                    })
+                .catch((error) => {
+                    alert(error);
+                    console.error('Error:', error);
+                });     
+            }
+            
+            function myFunction()
+                {
+                    var input, filter, table1, trn, td, i, txtValue;
+                    input = document.getElementById("myInput");
+                    filter = input.value;
+                    table1 = document.getElementById("myTable");
+                    trn = table1.getElementsByTagName("tr");
+                    for (i = 0; i < trn.length; i++) {
+                        td = trn[i].getElementsByTagName("td")[0];
+                        if (td) {
+                        txtValue = td.textContent || td.innerText;
+                        if (txtValue.indexOf(filter) > -1) {
+                            trn[i].style.display = "";
+                        } else {
+                            trn[i].style.display = "none";
+                        }
+                        }       
+                    }
+                }   
+                
+                function myFunction1()
+                {
+                    var input, filter, table1, trn, td, i, txtValue;
+                    input = document.getElementById("myInput1");
+                    filter = input.value;
+                    table1 = document.getElementById("myTable");
+                    trn = table1.getElementsByTagName("tr");
+                    for (i = 0; i < trn.length; i++) {
+                        td = trn[i].getElementsByTagName("td")[1];
+                        if (td) {
+                        txtValue = td.textContent || td.innerText;
+                        if (txtValue.indexOf(filter) > -1) {
+                            trn[i].style.display = "";
+                        } else {
+                            trn[i].style.display = "none";
+                        }
+                        }       
+                    }
+                } 
+                function myFunction2()
+                {
+                    var input, filter, table1, trn, td, i, txtValue;
+                    input = document.getElementById("myInput2");
+                    filter = input.value;
+                    table1 = document.getElementById("myTable");
+                    trn = table1.getElementsByTagName("tr");
+                    for (i = 0; i < trn.length; i++) {
+                        td = trn[i].getElementsByTagName("td")[2];
+                        if (td) {
+                        txtValue = td.textContent || td.innerText;
+                        if (txtValue.indexOf(filter) > -1) {
+                            trn[i].style.display = "";
+                        } else {
+                            trn[i].style.display = "none";
+                        }
+                        }       
+                    }
+                } 
+                function myFunction3()
+                {
+                    var input, filter, table1, trn, td, i, txtValue;
+                    input = document.getElementById("myInput3");
+                    filter = input.value;
+                    table1 = document.getElementById("myTable");
+                    trn = table1.getElementsByTagName("tr");
+                    for (i = 0; i < trn.length; i++) {
+                        td = trn[i].getElementsByTagName("td")[5];
+                        if (td) {
+                        txtValue = td.textContent || td.innerText;
+                        if (txtValue.indexOf(filter) > -1) {
+                            trn[i].style.display = "";
+                        } else {
+                            trn[i].style.display = "none";
+                        }
+                        }       
+                    }
+                } 
+
+                 
+
+            function myFunction4() {
+                var input, filter, table, tr, td, i, txtValue;
+                input = document.getElementById("myInput4");
+                filter = input.value;
+                table = document.getElementById("myTable");
+                tr = table.getElementsByTagName("tr");
+
+                for (i = 0; i < tr.length; i++) {
+                    td = tr[i].getElementsByTagName("td")[1];
+                    if (td) {
+                    txtValue = td.textContent || td.innerText;
+                    if (txtValue.indexOf(filter) > -1) {
+                        tr[i].style.display = "";
+                    } else {
+                        tr[i].style.display = "none";
+                    }
+                    }
+                }
+            }   
+            
+            function myFunction5()
+            {
+                var input, filter, table1, trn, td, i, txtValue;
+                input = document.getElementById("myInput5");
+                filter = input.value;
+                table1 = document.getElementById("myTable");
+                trn = table1.getElementsByTagName("tr");
+                for (i = 0; i < trn.length; i++) {
+                    td = trn[i].getElementsByTagName("td")[2];
+                    if (td) {
+                        txtValue = td.textContent || td.innerText || td.innerHTML;
+                    if (txtValue.indexOf(filter) > -1) {
+                        trn[i].style.display = "";
+                    } else {
+                        trn[i].style.display = "none";
+                    }
+                    }       
+                }
+            } 
+            function myFunction6()
+            {
+                var input, filter, table1, trn, td, i, txtValue;
+                input = document.getElementById("myInput6");
+                filter = input.value;
+                table1 = document.getElementById("myTable");
+                trn = table1.getElementsByTagName("tr");
+                for (i = 0; i < trn.length; i++) {
+                    td = trn[i].getElementsByTagName("td")[3];
+                    if (td) {
+                        txtValue = td.textContent || td.innerText || td.innerHTML;
+                    if (txtValue.indexOf(filter) > -1) {
+                        trn[i].style.display = "";
+                    } else {
+                        trn[i].style.display = "none";
+                    }
+                    }       
+                }
+            } 
+            function myFunction7()
+            {
+                var input, filter, table1, trn, td, i, txtValue;
+                input = document.getElementById("myInput7");
+                filter = input.value;
+                table1 = document.getElementById("myTable");
+                trn = table1.getElementsByTagName("tr");
+                for (i = 0; i < trn.length; i++) {
+                    td = trn[i].getElementsByTagName("td")[4];
+                    if (td) {
+                        txtValue = td.textContent || td.innerText || td.innerHTML;
+                    if (txtValue.indexOf(filter) > -1) {
+                         trn[i].style.display = "";
+                    } else {
+                        trn[i].style.display = "none";
+                    }
+                    }       
+                }
+            }
+            
+            function myFunction8()
+            {
+                var input, filter, table1, trn, td, i, txtValue;
+                input = document.getElementById("myInput8");
+                filter = input.value;
+                table1 = document.getElementById("myTable");
+                trn = table1.getElementsByTagName("tr");
+                for (i = 0; i < trn.length; i++) {
+                    td = trn[i].getElementsByTagName("td")[5];
+                    if (td) {
+                    txtValue = td.textContent || td.innerText || td.innerHTML;
+                    if (txtValue.indexOf(filter) > -1) {
+                         trn[i].style.display = "";
+                    } else {
+                        trn[i].style.display = "none";
+                    }
+                    }       
+                }
+            }
+            function myFunction9()
+            {
+                var input, filter, table1, trn, td, i, txtValue;
+                input = document.getElementById("myInput9");
+                filter = input.value;
+                table1 = document.getElementById("myTable");
+                trn = table1.getElementsByTagName("tr");
+                for (i = 0; i < trn.length; i++) {
+                    td = trn[i].getElementsByTagName("td")[6];
+                    if (td) {
+                    txtValue = td.textContent || td.innerText || td.innerHTML;
+                    if (txtValue.indexOf(filter) > -1) {
+                         trn[i].style.display = "";
+                    } else {
+                        trn[i].style.display = "none";
+                    }
+                    }       
+                }
+            }
+            function myFunction10()
+            {
+                var input, filter, table1, trn, td, i, txtValue;
+                input = document.getElementById("myInput10");
+                filter = input.value;
+                table1 = document.getElementById("myTable");
+                trn = table1.getElementsByTagName("tr");
+                for (i = 0; i < trn.length; i++) {
+                    td = trn[i].getElementsByTagName("td")[7];
+                    if (td) {
+                    txtValue = td.textContent || td.innerText || td.innerHTML;
+                    if (txtValue.indexOf(filter) > -1) {
+                         trn[i].style.display = "";
+                    } else {
+                        trn[i].style.display = "none";
+                    }
+                    }       
+                }
+            }
+        </script>
+    </head>    
+    <body>
+              
+            <div class="card">        
+                <button id="id1" onclick="search1()"> Click me before Search!</button>
+                <h3>BOOK based Search</h3>
+                <div>
+                    <input type="text" id="myInput" onkeyup="myFunction()" placeholder="Search for names" title="Type in a name" >
+                </div>
+                <div>
+                    <input type="text" id="myInput1" onkeyup="myFunction1()" placeholder="Search for authors" title="Type in a name">
+                </div>
+                <div>
+                    <input type="text" id="myInput2" onkeyup="myFunction2()" placeholder="Search for publisher" title="Type in a name">
+                </div>
+                <div>
+                    <input type="text" id="myInput3" onkeyup="myFunction3()" placeholder="Search for ISBN" title="Type in a name">
+                </div>
+                
+            </div>   
+            
+            <div class="card">
+                <button id="id1" onclick="search2()"> Click me before Search!</button>        
+                <h3>Characters based Search</h3>
+                <h5>Note: Its book based charecter list-nearly 4569 fictional charecters availble.you can't reload this page.it may take 2-4 min on full load.but you can search anytime in loading,it will be work. </h5>
+                <div>
+                    <input type="text" id="myInput4" onkeyup="myFunction4()" placeholder="Search for names" title="Type in a name" >
+                </div>
+                <div>
+                    <input type="text" id="myInput5" onkeyup="myFunction5()" placeholder="Search for Gender" title="Type in a gender">
+                </div>
+                <div>
+                    <input type="text" id="myInput6" onkeyup="myFunction6()" placeholder="Search for culture" title="Type in a cultures">
+                </div>
+                <div>
+                    <input type="text" id="myInput7" onkeyup="myFunction7()" placeholder="Search for born" title="Type in a born">
+                </div>
+                <div>
+                    <input type="text" id="myInput8" onkeyup="myFunction8()" placeholder="Search for dead" title="Type in a dead">
+                </div>
+                <div>
+                    <input type="text" id="myInput9" onkeyup="myFunction9()" placeholder="Search for titles" title="Type in a title">
+                </div>
+                <div>
+                    <input type="text" id="myInput10" onkeyup="myFunction10()" placeholder="Search for aliases" title="Type in a aliases">
+                </div>
+            </div> 
+            <div id="row2">
+
+            </div> 
+
+            <iframe id="iframe" width="100%" height="300" style="border:none;">
+            </iframe>
+           
+                
+    </body>
+</html>
